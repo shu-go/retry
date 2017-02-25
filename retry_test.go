@@ -1,15 +1,46 @@
-package test
+package retry
 
 import (
 	"testing"
 	"time"
-
-	"bitbucket.org/shu/retry"
 )
+
+func ExampleCount() {
+	done := Count(3 /*times*/, func() bool {
+		var shouldGoToNextStep bool
+		// :
+		if shouldGoToNextStep {
+			return true // causes done
+		} else {
+			// may cause another try
+			return false // causes !done after 3-time tries
+		}
+	})
+	if !done {
+		// oh no
+	}
+}
+
+func ExampleWait() {
+	done := Wait(3*time.Second, 200*time.Millisecond, func() bool {
+		return false
+		// impllicit time.Sleep(200*time.Millisecond)
+	})
+	// about 3 seconds later
+	if !done {
+	}
+
+	done = Wait(3*time.Second, time.Hour, func() bool {
+		return true
+	})
+	// immediate
+	if done {
+	}
+}
 
 func TestCount(t *testing.T) {
 	a := 0
-	done := retry.Count(3, func() bool {
+	done := Count(3, func() bool {
 		a++
 		return false
 	})
@@ -20,7 +51,7 @@ func TestCount(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Count(3, func() bool {
+	done = Count(3, func() bool {
 		a++
 		return true
 	})
@@ -31,7 +62,7 @@ func TestCount(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Count(0, func() bool {
+	done = Count(0, func() bool {
 		a++
 		return false
 	})
@@ -44,7 +75,7 @@ func TestCount(t *testing.T) {
 
 func TestTime(t *testing.T) {
 	a := 0
-	done := retry.Time(8*time.Millisecond, func() bool {
+	done := Time(8*time.Millisecond, func() bool {
 		a++
 		time.Sleep(3 * time.Millisecond)
 		return false
@@ -56,7 +87,7 @@ func TestTime(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Time(8*time.Millisecond, func() bool {
+	done = Time(8*time.Millisecond, func() bool {
 		a++
 		time.Sleep(3 * time.Millisecond)
 		return true
@@ -68,7 +99,7 @@ func TestTime(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Time(3*time.Millisecond, func() bool {
+	done = Time(3*time.Millisecond, func() bool {
 		a++
 		time.Sleep(3 * time.Millisecond)
 		return false
@@ -80,7 +111,7 @@ func TestTime(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Time(3*time.Millisecond, func() bool {
+	done = Time(3*time.Millisecond, func() bool {
 		a++
 		return false
 	})
@@ -93,7 +124,7 @@ func TestTime(t *testing.T) {
 
 func TestWait(t *testing.T) {
 	a := 0
-	done := retry.Wait(8*time.Millisecond, 3*time.Millisecond, func() bool {
+	done := Wait(8*time.Millisecond, 3*time.Millisecond, func() bool {
 		a++
 		return false
 	})
@@ -104,7 +135,7 @@ func TestWait(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Wait(3*time.Millisecond, 3*time.Millisecond, func() bool {
+	done = Wait(3*time.Millisecond, 3*time.Millisecond, func() bool {
 		a++
 		return false
 	})
@@ -115,7 +146,7 @@ func TestWait(t *testing.T) {
 	}
 
 	a = 0
-	done = retry.Wait(3*time.Millisecond, 3*time.Hour, func() bool {
+	done = Wait(3*time.Millisecond, 3*time.Hour, func() bool {
 		a++
 		return false
 	})
