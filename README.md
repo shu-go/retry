@@ -15,7 +15,7 @@ Count
 ```
 #!go
 
-done := Count(3 /*times*/, func() bool {
+done := retry.Count(3 /*times*/, func() bool {
 	var shouldGoToNextStep bool
 	// :
 	if shouldGoToNextStep {
@@ -28,7 +28,6 @@ done := Count(3 /*times*/, func() bool {
 if !done {
 	// oh no
 }
-
 ```
 
 Wait
@@ -36,7 +35,7 @@ Wait
 ```
 #!go
 
-done := Wait(3*time.Second, 200*time.Millisecond, func() bool {
+done := retry.Wait(3*time.Second, 200*time.Millisecond, func() bool {
 	return false
 	// impllicit time.Sleep(200*time.Millisecond)
 })
